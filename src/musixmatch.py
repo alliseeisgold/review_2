@@ -28,6 +28,7 @@ class Musixmatch:
             x = json.loads(response.content)
             return x, response.status_code
         Musixmatch.return_error(response.status_code)
+
     @staticmethod
     def get_country_charts(country_code="XW", page_size=5):
         parameters = (
