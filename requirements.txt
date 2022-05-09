@@ -1,4 +1,3 @@
 pyTelegramBotAPI
-requests
-iso3166~=2.0.2
 requests~=2.25.1
+iso3166~=2.0.2
