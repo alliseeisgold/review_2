@@ -69,6 +69,45 @@ def get_charts_of_country(message):
         bot.send_message(message.chat.id, text=MUSIXMATCH_ERROR)
 
 
+@bot.message_handler(commands=["chart_artists"])
+def get_artists_of_country_chart(message):
+    country_code = " ".join(message.json["text"].split(" ")[1:]).strip()
+    if not country_code or len(country_code) == 0:
+        bot.send_message(
+            message.chat.id,
+            text=FORMAT_ISO3166_ERROR,
+        )
+        return
+
+    response, status = Musixmatch.get_chart_artists(country_code)
+
+    if status == 200:
+        if not countries.__contains__(country_code.lower()):
+            bot.send_message(message.chat.id, text="Didn't find country. " + FORMAT_ISO3166_ERROR,
+                             parse_mode="Markdown")
+            return
+        country = countries.get(country_code.lower()).name
+        answer = (
+                "Here's artists' top chart of *"
+                + country
+                + "*:\n"
+        )
+        for artist in response["message"]["body"]["artist_list"]:
+            name = artist["artist"]["artist_name"]
+            if len(artist["artist"]["artist_name_translation_list"]) > 0:
+                for transl in artist["artist"]["artist_name_translation_list"]:
+                    if transl["artist_name_translation"]["language"] == "EN":
+                        name = transl["artist_name_translation"]["translation"]
+                        break
+            answer += f"Artist: *{name}*\n\n"
+        bot.send_message(message.chat.id, text=answer, parse_mode="Markdown")
+        return
+    bot.send_message(
+        message.chat.id,
+        text=MUSIXMATCH_ERROR,
+    )
+
+
 if __name__ == '__main__':
     MUSIXMATCH_ERROR = """Couldn't connect to MusixMatch. Please try again.
                            Anyway you can report it to me @alliseeisgoal. 
