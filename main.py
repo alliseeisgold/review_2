@@ -7,11 +7,10 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 
 @bot.message_handler(commands=["help"])
-def helper(message):
-    m = """/tracks <singer name>, for example: /tracks justin bieber \n
-             /charts <country_code in iso3166 standard>. for example: /charts ru
-            """
-    bot.send_message(message.chat.id, text=m, parse_mode="Markdown")
+def help(message):
+    m = "/tracks <singer name>, for example: /tracks justin bieber "
+    ans = m + "\n" + "/charts <country_code>. for example: /charts ru"
+    bot.send_message(message.chat.id, text=ans)
 
 
 @bot.message_handler(commands=["tracks"])
