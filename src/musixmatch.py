@@ -1,6 +1,6 @@
 import requests
 import json
-from config import MUSIXMATCH_API_KEY
+from src.config import MUSIXMATCH_API_KEY
 
 URL = "https://api.musixmatch.com/ws/1.1/"
 

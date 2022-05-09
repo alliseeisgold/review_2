@@ -1,6 +1,6 @@
 import telebot
-from config import *
-from musixmatch import Musixmatch
+from src.config import *
+from src.musixmatch import Musixmatch
 from iso3166 import countries
 bot = telebot.TeleBot(BOT_TOKEN)
 
