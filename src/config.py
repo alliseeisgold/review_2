@@ -1,6 +1,6 @@
 import os
 
-with open('../.env', 'r') as environment_variables:
+with open('./.env', 'r') as environment_variables:
     for line in environment_variables.readlines():
         key, value = line.split(' = ')
         os.environ[key] = value.strip()
