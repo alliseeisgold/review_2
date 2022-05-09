@@ -2,6 +2,7 @@ import telebot
 from src.config import *
 from src.musixmatch import Musixmatch
 from iso3166 import countries
+from src.translator import Translate
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -10,7 +11,7 @@ bot = telebot.TeleBot(BOT_TOKEN)
 def help(message):
     m = "/tracks <singer name>, for example: /tracks justin bieber "
     ans = m + "\n" + "/charts <country_code>. for example: /charts ru"
-    bot.send_message(message.chat.id, text=ans)
+    bot.send_message(message.chat.id, text=Translate.from_lang_to_lang(ans, "en", "ru"))
 
 
 @bot.message_handler(commands=["tracks"])

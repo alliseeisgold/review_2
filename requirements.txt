@@ -1,3 +1,4 @@
 pyTelegramBotAPI
 requests
 iso3166
+translate

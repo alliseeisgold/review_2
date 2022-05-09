@@ -6,3 +6,4 @@ import os
 #         os.environ[key] = value.strip()
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 MUSIXMATCH_API_KEY = os.environ["MUSIXMATCH_API_KEY"]
+YA_TRANSLATOR_API = os.environ["TRANSLATOR_API_KEY"]
