@@ -65,7 +65,7 @@ def get_charts_of_country(message):
             url = track["track"]["track_share_url"]
             answer += f"Track: [{tr}]({url}) (lyrics)\nArtist: *" + artist \
                       + "*\n\n"
-        bot.send_message(message.chat.id, text=answer, parse_mode="Markdown")
+        bot.send_message(message.chat.id, text=Translate.from_lang_to_lang(answer, "en", "ru"), parse_mode="Markdown")
     else:
         bot.send_message(message.chat.id, text=MUSIXMATCH_ERROR)
 
