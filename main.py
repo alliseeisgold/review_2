@@ -2,7 +2,16 @@ import telebot
 from src.config import *
 from src.musixmatch import Musixmatch
 from iso3166 import countries
+
 bot = telebot.TeleBot(BOT_TOKEN)
+
+
+@bot.message_handler(commands=["help"])
+def help(message):
+    helper = """/tracks <singer name>, for example: /tracks justin bieber \n
+             /charts <country_code in iso3166 standart>. for example: /charts ru
+            """
+    bot.send_message(message.chat.id, text=helper, parse_mode="Markdown")
 
 
 @bot.message_handler(commands=["tracks"])
