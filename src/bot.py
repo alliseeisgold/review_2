@@ -1,0 +1,285 @@
+import telebot
+from telebot import types
+from src.config import *
+from src.musixmatch import Musixmatch
+from iso3166 import countries
+from src.translator import Translate
+from src.constant import LANGUAGES
+from src.syntax import helper
+from src.lyrics import *
+
+bot = telebot.TeleBot(BOT_TOKEN)
+
+lang = 'en'
+
+
+@bot.message_handler(commands=["start", "restart"])
+def bot_start(message):
+    user = message.from_user.first_name
+    greeting = """
+<b>[en]</b>\nHello,  <b>{}</b> ! Do you know who I am? ...\
+Yes! I'm <b>music_render</b> bot. \
+I help you to find lyrics of a given music, top singers of \
+the country you gave, top tracks of your favourite singer \
+and others or the most popular artists in the country you want.\n
+------------------------------------------------------------------------\n
+<b>[ru]</b>\nПривет, {}! Ты знаешь, кто я такой? ... \
+Да! Я <b>music_render</b> бот. Я помогу тебе найти текст музыки, которой \
+ты хочешь, лучших исполнителей страны, которую ты указал, лучшие треки \
+твоего любимого певца и не только и самые популярные \
+артисты в нужной тебе стране.
+""".format(user, user)
+    bot.send_message(
+        message.chat.id,
+        text=greeting,
+        parse_mode="HTML"
+    )
+    bot.send_sticker(
+        message.chat.id,
+        GREETING_STICKER
+    )
+
+
+@bot.message_handler(commands=["set_lang"])
+def set_lang(message):
+    global lang
+    lang = " ".join(
+        [t for t in message.json["text"].split(" ")[1:]]
+    ).strip()
+    if not LANGUAGES.__contains__(lang):
+        error = """
+        Invalid language code.\
+        Please check [ISO639](https://ru.wikipedia.org/wiki/ISO_639) standard.
+        """
+        bot.send_message(message.chat.id, text=error, parse_mode="Markdown")
+        bot.send_sticker(message.chat.id, WISE_STICKER)
+    else:
+        m = "Successfully changed to *{}*".format(LANGUAGES[lang])
+        bot.send_message(message.chat.id, text=m, parse_mode="Markdown")
+        bot.send_sticker(message.chat.id, NICE_STICKER)
+
+
+@bot.message_handler(commands=["help"])
+def help(message):
+    for_html = ""
+    for_transl = ""
+    for items in helper:
+        for_transl += items + "\n"
+        for_html += "<b><i>" + items + "</i></b>" + "\n"
+        for item in helper[items]:
+            for_transl += "\t\t\t" + item + ': '
+            for_html += "\t\t\t" + "<b>" + item + "</b>" + ": "
+            for els in helper[items][item]:
+                for_transl += els
+                for_html += els
+            for_transl += '\n\t'
+            for_html += '\n\t'
+        for_transl += '\n'
+        for_html += '\n'
+    bot.send_message(message.chat.id,
+                     # text=Translate.translation(for_transl, to_lang='ru'),
+                     text=for_html,
+                     parse_mode="HTML")
+
+
+@bot.message_handler(commands=["tracks"])
+def tracks_of_author(message):
+    author = " ".join(
+        [t.capitalize() for t in message.json["text"].split(" ")[1:]]
+    ).strip()
+    response, status_code = Musixmatch.get_tracks_of_author(author)
+    if status_code == 200:
+        ans = "Here's list of popular tracks of *" + author + "*:\n"
+        l = len(ans)
+        for track in response["message"]["body"]["track_list"]:
+            tr = track["track"]["track_name"]
+            album_name = track["track"]["album_name"]
+            url = track["track"]["track_share_url"]
+            ans += "Track: [{}]({})\n".format(tr, url)
+            if album_name:
+                ans += "Album: *" + album_name + "*"
+            ans += "\n\n"
+        flag = False
+        if l == len(ans):
+            ans += "Author " + author + " hasn't any tracks."
+            flag = True
+        bot.send_message(message.chat.id,
+                         text=Translate.translation(ans, to_lang=lang),
+                         parse_mode="Markdown")
+        if not flag:
+            bot.send_sticker(message.chat.id, PLAYER_STICKER)
+        else:
+            bot.send_sticker(message.chat.id, JOKE_STICKER)
+    else:
+        bot.send_message(message.chat.id, text=MUSIXMATCH_ERROR)
+        bot.send_sticker(message.chat.id, UPS_STICKER)
+
+
+@bot.message_handler(commands=["charts"])
+def get_charts_of_country(message):
+    country_code = " ".join(message.json["text"].split(" ")[1:]).strip()
+    if not country_code or len(country_code) == 0:
+        bot.send_message(
+            message.chat.id,
+            text=FORMAT_ISO3166_ERROR,
+        )
+        bot.send_sticker(message.chat.id, UPS_STICKER)
+        return
+    else:
+        response, status = Musixmatch.get_country_charts(country_code)
+        if status == 200:
+            try:
+                cc = countries.get(country_code.lower()).name
+            except:
+                bot.send_message(
+                    message.chat.id,
+                    text=FORMAT_ISO3166_ERROR,
+                )
+                bot.send_sticker(message.chat.id, UPS_STICKER)
+                return
+            ans = "Here's top chart of *" + cc + "*:\n"
+            for track in response["message"]["body"]["track_list"]:
+                tr = track["track"]["track_name"]
+                artist = track["track"]["artist_name"]
+                url = track["track"]["track_share_url"]
+                ans += "Track: [{}]({}) (lyrics)\nArtist: *".format(tr, url) + \
+                       artist + "*\n\n"
+            bot.send_message(message.chat.id,
+                             text=Translate.translation(ans, to_lang=lang),
+                             parse_mode="Markdown")
+            bot.send_sticker(message.chat.id, PLAYER_STICKER)
+        else:
+            bot.send_message(
+                message.chat.id,
+                text=MUSIXMATCH_ERROR)
+            bot.send_sticker(
+                message.chat.id,
+                ERROR_STICKER
+            )
+
+
+@bot.message_handler(commands=["chart_artists"])
+def get_artists_of_country_chart(message):
+    country_code = " ".join(message.json["text"].split(" ")[1:]).strip()
+    if not country_code or len(country_code) == 0:
+        bot.send_message(
+            message.chat.id,
+            text=FORMAT_ISO3166_ERROR,
+        )
+        bot.send_sticker(message.chat.id, UPS_STICKER)
+    else:
+        response, status = Musixmatch.get_chart_artists(country_code)
+        if status == 200:
+            if not countries.__contains__(country_code.lower()):
+                bot.send_message(message.chat.id,
+                                 text="Didn't find country. " + FORMAT_ISO3166_ERROR,
+                                 parse_mode="Markdown")
+                return
+            country = countries.get(country_code.lower()).name
+            answer = (
+                    "Here's artists' top chart of *"
+                    + country
+                    + "*:\n"
+            )
+            for artist in response["message"]["body"]["artist_list"]:
+                name = artist["artist"]["artist_name"]
+                if len(artist["artist"]["artist_name_translation_list"]) > 0:
+                    for transl in artist["artist"]["artist_name_translation_list"]:
+                        if transl["artist_name_translation"]["language"] == "EN":
+                            name = transl["artist_name_translation"]["translation"]
+                            break
+                answer += "Artist: *{}*\n\n".format(name)
+            bot.send_message(message.chat.id,
+                             text=Translate.translation(answer, to_lang=lang),
+                             parse_mode="Markdown")
+        else:
+            bot.send_message(
+                message.chat.id,
+                text=MUSIXMATCH_ERROR,
+            )
+            bot.send_sticker(
+                message.chat.id,
+                ERROR_STICKER
+            )
+
+
+def short(name):
+    artist = ''
+    track = ''
+    if "-" in name:
+        l = name.split("-")
+        artist, track = l[0], " ".join(l[1:])
+    elif " " in name:
+        l = name.split(" ")
+        artist, track = l[:-1], l[-1:]
+    if len(artist) > 15:
+        artist = artist[:15]
+    if len(track) > 15:
+        track = track[:15]
+    return [artist, track]
+
+
+@bot.message_handler(commands=["lyrics"])
+def get_lyrics(message):
+    res = [
+        tmp.strip() for tmp in " ".join(
+            message.json["text"].split(" ")[1:]
+        ).split("-")
+    ]
+    if len(res) == 1 and not len(res[0]):
+        bot.send_message(
+            message.chat.id,
+            text="Please add searching parameters: artist name "
+                 "or/and track name.",
+        )
+        return
+    elif len(res) == 1:
+        track = res[0]
+        artist = ""
+    else:
+        track, artist = res
+    songs, status = search(track + " " + artist)
+    if not status and "Error" in songs:
+        bot.reply_to(message, text=songs["Error"])
+        return
+    elif not status:
+        bot.reply_to(
+            message,
+            text=MUSIXMATCH_ERROR,
+        )
+        return
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    for k in songs:
+        shortened = short(k)
+        button = types.InlineKeyboardButton(k,
+                                            callback_data=" ".join(shortened)
+                                            )
+        keyboard.add(button)
+    text = "Which song are you searching for?\n" \
+           "Please pass track details more correctly " \
+           "(maybe you missed any apostrophe)"
+    bot.send_message(message.chat.id, text, reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda callback: True)
+def callbacks(callback):
+    m_kup = types.InlineKeyboardMarkup(row_width=1)
+    button = types.InlineKeyboardButton("Back", callback_data="B")
+    m_kup.add(button)
+    k = callback.data
+    songs, status = search(k)
+    for i in songs:
+        if k in " ".join(short(i)):
+            k = i
+            break
+    if status:
+        text = parse_lyrics(songs[k])
+    else:
+        text = MUSIXMATCH_ERROR
+    bot.edit_message_text(
+        text[:4096], callback.message.chat.id, callback.message.message_id
+    )
+
+
+def start_bot():
+    bot.polling(none_stop=True, timeout=5)
