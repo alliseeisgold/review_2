@@ -11,7 +11,7 @@ lang = "en"
 
 @bot.message_handler(commands=["start"])
 def set_lang(message):
-    user = message.json['text']
+    user = message.json['from_user']
     bot.send_message(message.chat.id, text=user)
 
 
