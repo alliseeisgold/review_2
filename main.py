@@ -25,7 +25,7 @@ def set_lang(message):
                 лучшие треки вашего любимого певца и другие или самые
                 популярные артисты в нужной вам стране.
         """.format(user, user)
-    bot.send_message(message.chat.id, text=user)
+    bot.send_message(message.chat.id, text=greeting)
 
 
 @bot.message_handler(commands=["set_lang"])
