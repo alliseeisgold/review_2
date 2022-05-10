@@ -11,6 +11,7 @@ lang = "en"
 
 @bot.message_handler(commands=["set_lang"])
 def set_lang(message):
+    global lang
     lang = " ".join(
         [t for t in message.json["text"].split(" ")[1:]]
     ).strip()
