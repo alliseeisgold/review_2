@@ -6,8 +6,7 @@ import logging
 import random
 import re
 import requests
-from urllib.parse import quote
-
+from urllib import parse
 import urllib3
 
 from src.constant import LANGUAGES, DEFAULT_SERVICE_URLS
@@ -109,7 +108,7 @@ class google_translator:
         rpc = [[[random.choice(GOOGLE_TTS_RPC), escaped_parameter, None, "generic"]]]
         espaced_rpc = json.dumps(rpc, separators=(',', ':'))
         # text_urldecode = quote(text.strip())
-        freq_initial = "f.req={}&".format(quote(espaced_rpc))
+        freq_initial = "f.req={}&".format(parse.quote(espaced_rpc))
         freq = freq_initial
         return freq
 
@@ -142,7 +141,7 @@ class google_translator:
                                     headers=headers,
                                     )
         try:
-            if self.proxies == None or type(self.proxies) != dict:
+            if self.proxies is None or type(self.proxies) != dict:
                 self.proxies = {}
             with requests.Session() as s:
                 s.proxies = self.proxies
@@ -162,20 +161,20 @@ class google_translator:
                         if len(response) == 1:
                             if len(response[0]) > 5:
                                 sentences = response[0][5]
-                            else: ## only url
+                            else:
                                 sentences = response[0][0]
-                                if pronounce == False:
+                                if not pronounce:
                                     return sentences
-                                elif pronounce == True:
-                                    return [sentences,None,None]
+                                elif pronounce:
+                                    return [sentences, None, None]
                             translate_text = ""
                             for sentence in sentences:
                                 sentence = sentence[0]
                                 translate_text += sentence.strip() + ' '
                             translate_text = translate_text
-                            if pronounce == False:
+                            if not pronounce:
                                 return translate_text
-                            elif pronounce == True:
+                            elif pronounce:
                                 pronounce_src = (response_[0][0])
                                 pronounce_tgt = (response_[1][0][0][1])
                                 return [translate_text, pronounce_src, pronounce_tgt]
@@ -183,9 +182,9 @@ class google_translator:
                             sentences = []
                             for i in response:
                                 sentences.append(i[0])
-                            if pronounce == False:
+                            if not pronounce:
                                 return sentences
-                            elif pronounce == True:
+                            elif pronounce:
                                 pronounce_src = (response_[0][0])
                                 pronounce_tgt = (response_[1][0][0][1])
                                 return [sentences, pronounce_src, pronounce_tgt]
@@ -221,7 +220,7 @@ class google_translator:
                                     data=freq,
                                     headers=headers)
         try:
-            if self.proxies == None or type(self.proxies) != dict:
+            if self.proxies is None or type(self.proxies) != dict:
                 self.proxies = {}
             with requests.Session() as s:
                 s.proxies = self.proxies
@@ -235,7 +234,7 @@ class google_translator:
                     # regex_str = r"\[\[\"wrb.fr\",\"MkEWBc\",\"\[\[(.*).*?,\[\[\["
                     try:
                         # data_got = re.search(regex_str,decoded_line).group(1)
-                        response = (decoded_line)
+                        response = decoded_line
                         response = json.loads(response)
                         response = list(response)
                         response = json.loads(response[0][2])
