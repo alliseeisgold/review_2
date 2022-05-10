@@ -2,16 +2,25 @@ import telebot
 from src.config import *
 from src.musixmatch import Musixmatch
 from iso3166 import countries
-from src.translator import Translate
 
 bot = telebot.TeleBot(BOT_TOKEN)
+
+cur_lang = "en"
+
+
+@bot.message_handler(commands=["set_lang"])
+def set_lang(message):
+    cur_lang = " ".join(
+        [t.capitalize() for t in message.json["text"].split(" ")[1:]]
+    ).strip()
+    bot.send_message(message.chat.id, text=cur_lang)
 
 
 @bot.message_handler(commands=["help"])
 def help(message):
     m = "/tracks <singer name>, for example: /tracks justin bieber "
     ans = m + "\n" + "/charts <country_code>. for example: /charts ru"
-    bot.send_message(message.chat.id, text=Translate.from_lang_to_lang(ans, "en", "ru"))
+    bot.send_message(message.chat.id, text=ans)
 
 
 @bot.message_handler(commands=["tracks"])
@@ -65,7 +74,7 @@ def get_charts_of_country(message):
             url = track["track"]["track_share_url"]
             answer += f"Track: [{tr}]({url}) (lyrics)\nArtist: *" + artist \
                       + "*\n\n"
-        bot.send_message(message.chat.id, text=Translate.from_lang_to_lang(answer, "en", "ru"), parse_mode="Markdown")
+        bot.send_message(message.chat.id, text=answer, parse_mode="Markdown")
     else:
         bot.send_message(message.chat.id, text=MUSIXMATCH_ERROR)
 
