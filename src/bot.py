@@ -258,7 +258,9 @@ def get_lyrics(message):
     text = "Which song are you searching for?\n" \
            "Please pass track details more correctly " \
            "(maybe you missed any apostrophe)"
-    bot.send_message(message.chat.id, text, reply_markup=keyboard)
+    bot.send_message(message.chat.id,
+                     Translate.translation(text, lang),
+                     reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda callback: True)
@@ -277,7 +279,9 @@ def callbacks(callback):
     else:
         text = MUSIXMATCH_ERROR
     bot.edit_message_text(
-        text[:4096], callback.message.chat.id, callback.message.message_id
+        Translate.translation(text[:4096], lang),
+        callback.message.chat.id,
+        callback.message.message_id
     )
 
 

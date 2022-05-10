@@ -31,7 +31,7 @@ def search(parameter, timeout=None):
 def parse_lyrics(url, timeout=None):
     response = requests.get(url, timeout)
     soup = BeautifulSoup(response.content, "html.parser")
-    soup = soup("div", class_="")[1]
+    soup = soup("div", class_="")[2]
     for element in soup(text=lambda text: isinstance(text, Comment)):
         element.extract()
     lyrics = soup.text.strip()
