@@ -12,6 +12,7 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 gll = Globals()
 
+
 @bot.message_handler(commands=["start", "restart"])
 def bot_start(message):
     user = message.from_user.first_name
