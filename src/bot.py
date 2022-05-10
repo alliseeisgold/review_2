@@ -1,11 +1,11 @@
 import telebot
 from telebot import types
-from src.config import *
+from src.config import BOT_TOKEN
 from src.musixmatch import Musixmatch
 from iso3166 import countries
 from src.translator import Translate as trl
 from src.constant import LANGUAGES
-from src.lyrics import *
+from src.lyrics import parse_lyrics, search
 from src.globals import Globals
 
 bot = telebot.TeleBot(BOT_TOKEN)

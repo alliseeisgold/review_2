@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 
-export BOT_TOKEN=5310805270:AAGgZ_v25a7jRfAzy0Di8AumP_UfG3v6ldg
-export MUSIXMATCH_API_KEY=352f922227a47654a366d2edc58fc7ae
-export TRANSLATOR_API_KEY=t1.9euelZqWyJTHy5KWj86XnMvLzpycj-3rnpWam8nMyc-czZaTlI2Ox42Tz5Ll8_diOBls-e8eMzlP_t3z9yJnFmz57x4zOU_-.DkL0XP3LwmRFDuOMBatZo6IOJTUIzoKxMcXK79AA-UGMZjYHtiKBVLrAwlLbGX1R0Kap0jcLviYYXaVsxfkaDg
+export BOT_TOKEN=<Your Token>
+export MUSIXMATCH_API_KEY=<Your musixmatch.com>
+pip install -r requiremenets.txt
 python3 main.py
