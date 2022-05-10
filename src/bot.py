@@ -283,7 +283,7 @@ def callbacks(callback):
     else:
         text = Globals.MUSIXMATCH_ERROR
     bot.edit_message_text(
-        trl.translation(text[:4096], gll.get_lang()),
+        text[:4096],
         callback.message.chat.id,
         callback.message.message_id
     )
