@@ -12,6 +12,19 @@ lang = "en"
 @bot.message_handler(commands=["start"])
 def set_lang(message):
     user = message.from_user.first_name
+    greeting = """
+                Hello, {}! Do you know who I am? ...
+                Yes! I'm bot. I help you to find lyrics of 
+                a given music, top singers of the country you gave,
+                top tracks of your favourite singer and others or the most
+                popular artists in the country you want.
+                ----------------------------------------------------------
+                Привет, {}! Ты знаешь, кто я такой? ...
+                Да! Я бот. Я помогу тебе найти тексты
+                данной музыки, лучших исполнителей страны, которую вы указали,
+                лучшие треки вашего любимого певца и другие или самые
+                популярные артисты в нужной вам стране.
+        """.format(user, user)
     bot.send_message(message.chat.id, text=user)
 
 
