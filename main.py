@@ -2,18 +2,22 @@ import telebot
 from src.config import *
 from src.musixmatch import Musixmatch
 from iso3166 import countries
+from iso639 import languages
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
-cur_lang = "en"
+lang = "en"
 
 
 @bot.message_handler(commands=["set_lang"])
 def set_lang(message):
-    cur_lang = " ".join(
-        [t.capitalize() for t in message.json["text"].split(" ")[1:]]
+    lang = " ".join(
+        [t for t in message.json["text"].split(" ")[1:]]
     ).strip()
-    bot.send_message(message.chat.id, text=cur_lang)
+    if not languages.get(lang) or len(lang) == 0:
+        bot.send_message(message.chat.id, text="WTF man?")
+        return
+    bot.send_message(message.chat.id, text=lang)
 
 
 @bot.message_handler(commands=["help"])
