@@ -21,7 +21,7 @@ def set_lang(message):
 def help(message):
     m = "/tracks <singer name>, for example: /tracks justin bieber "
     ans = m + "\n" + "/charts <country_code>. for example: /charts ru"
-    bot.send_message(message.chat.id, text=Translate.from_lang_to_lang(ans, 'en', lang))
+    bot.send_message(message.chat.id, text=Translate.translation(ans, to_lang=lang))
 
 
 @bot.message_handler(commands=["tracks"])
@@ -43,7 +43,7 @@ def tracks_of_author(message):
             ans += "\n\n"
         if l == len(ans):
             ans += "Author " + author + " hasn't any tracks."
-        bot.send_message(message.chat.id, text=ans, parse_mode="Markdown")
+        bot.send_message(message.chat.id, text=Translate.translation(ans, to_lang=lang), parse_mode="Markdown")
     else:
         bot.send_message(message.chat.id, text=MUSIXMATCH_ERROR)
 
@@ -75,7 +75,7 @@ def get_charts_of_country(message):
             url = track["track"]["track_share_url"]
             answer += f"Track: [{tr}]({url}) (lyrics)\nArtist: *" + artist \
                       + "*\n\n"
-        bot.send_message(message.chat.id, text=answer, parse_mode="Markdown")
+        bot.send_message(message.chat.id, text=Translate.translation(answer, to_lang=lang), parse_mode="Markdown")
     else:
         bot.send_message(message.chat.id, text=MUSIXMATCH_ERROR)
 
@@ -111,7 +111,7 @@ def get_artists_of_country_chart(message):
                         name = transl["artist_name_translation"]["translation"]
                         break
             answer += f"Artist: *{name}*\n\n"
-        bot.send_message(message.chat.id, text=answer, parse_mode="Markdown")
+        bot.send_message(message.chat.id, text=Translate.translation(answer, to_lang=lang), parse_mode="Markdown")
         return
     bot.send_message(
         message.chat.id,
