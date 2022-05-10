@@ -15,6 +15,7 @@ def set_lang(message):
         [t for t in message.json["text"].split(" ")[1:]]
     ).strip()
 
+
 @bot.message_handler(commands=["help"])
 def help(message):
     m = "/tracks <singer name>, for example: /tracks justin bieber "
