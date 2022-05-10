@@ -3,3 +3,4 @@ requests~=2.25.1
 iso3166~=2.0.2
 translate~=3.6.1
 urllib3~=1.26.5
+beautifulsoup4~=4.11.1
