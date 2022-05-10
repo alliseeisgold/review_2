@@ -3,15 +3,14 @@ from telebot import types
 from src.config import *
 from src.musixmatch import Musixmatch
 from iso3166 import countries
-from src.translator import Translate
+from src.translator import Translate as trl
 from src.constant import LANGUAGES
-from src.syntax import helper
 from src.lyrics import *
+from src.globals import Globals
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
-lang = 'en'
-
+gll = Globals()
 
 @bot.message_handler(commands=["start", "restart"])
 def bot_start(message):
@@ -36,49 +35,54 @@ and others or the most popular artists in the country you want.\n
     )
     bot.send_sticker(
         message.chat.id,
-        GREETING_STICKER
+        Globals.GREETING_STICKER
     )
 
 
 @bot.message_handler(commands=["set_lang"])
 def set_lang(message):
-    global lang
-    lang = " ".join(
+    a = " ".join(
         [t for t in message.json["text"].split(" ")[1:]]
     ).strip()
-    if not LANGUAGES.__contains__(lang):
+    if not LANGUAGES.__contains__(a):
         error = """
         Invalid language code.\
         Please check [ISO639](https://ru.wikipedia.org/wiki/ISO_639) standard.
         """
-        bot.send_message(message.chat.id, text=error, parse_mode="Markdown")
-        bot.send_sticker(message.chat.id, WISE_STICKER)
+        bot.send_message(message.chat.id,
+                         text=trl.translation(error, gll.get_lang()),
+                         parse_mode="Markdown")
+        bot.send_sticker(message.chat.id,
+                         Globals.WISE_STICKER)
     else:
-        m = "Successfully changed to *{}*".format(LANGUAGES[lang])
-        bot.send_message(message.chat.id, text=m, parse_mode="Markdown")
-        bot.send_sticker(message.chat.id, NICE_STICKER)
+        gll.chang_lang(a)
+        m = "Successfully changed to *{}*".format(LANGUAGES[gll.get_lang()])
+        bot.send_message(message.chat.id,
+                         text=trl.translation(m, gll.get_lang()),
+                         parse_mode="Markdown")
+        bot.send_sticker(message.chat.id,
+                         Globals.NICE_STICKER)
+        for items in Globals.COMMON_WORDS:
+            Globals.COMMON_WORDS[items] = trl.translation(
+                Globals.COMMON_WORDS[items],
+                gll.get_lang()
+            )
 
 
 @bot.message_handler(commands=["help"])
 def help(message):
-    for_html = ""
-    for_transl = ""
+    ans = ""
+    helper = trl.translate_syntax(gll.get_lang())
     for items in helper:
-        for_transl += items + "\n"
-        for_html += "<b><i>" + items + "</i></b>" + "\n"
+        ans += "<b><i>" + items + "</i></b>" + "\n"
         for item in helper[items]:
-            for_transl += "\t\t\t" + item + ': '
-            for_html += "\t\t\t" + "<b>" + item + "</b>" + ": "
+            ans += "<b>" + item + "</b>" + ": "
             for els in helper[items][item]:
-                for_transl += els
-                for_html += els
-            for_transl += '\n\t'
-            for_html += '\n\t'
-        for_transl += '\n'
-        for_html += '\n'
+                ans += els
+            ans += '\n'
+        ans += '\n'
     bot.send_message(message.chat.id,
-                     # text=Translate.translation(for_transl, to_lang='ru'),
-                     text=for_html,
+                     text=ans,
                      parse_mode="HTML")
 
 
@@ -89,30 +93,30 @@ def tracks_of_author(message):
     ).strip()
     response, status_code = Musixmatch.get_tracks_of_author(author)
     if status_code == 200:
-        ans = "Here's list of popular tracks of *" + author + "*:\n"
+        ans = Globals.COMMON_WORDS["tracks_words"] + "*"+author + "*:\n"
         l = len(ans)
         for track in response["message"]["body"]["track_list"]:
             tr = track["track"]["track_name"]
             album_name = track["track"]["album_name"]
             url = track["track"]["track_share_url"]
-            ans += "Track: [{}]({})\n".format(tr, url)
+            ans += Globals.COMMON_WORDS["Track"] + ": [{}]({})\n".format(tr, url)
             if album_name:
-                ans += "Album: *" + album_name + "*"
+                ans += Globals.COMMON_WORDS["Album"] + ": *" + album_name + "*"
             ans += "\n\n"
         flag = False
         if l == len(ans):
-            ans += "Author " + author + " hasn't any tracks."
+            ans += Globals.COMMON_WORDS["Author"] + " *" + author + "*" + Globals.COMMON_WORDS["no_tracks"]
             flag = True
         bot.send_message(message.chat.id,
-                         text=Translate.translation(ans, to_lang=lang),
+                         ans,
                          parse_mode="Markdown")
         if not flag:
-            bot.send_sticker(message.chat.id, PLAYER_STICKER)
+            bot.send_sticker(message.chat.id, Globals.PLAYER_STICKER)
         else:
-            bot.send_sticker(message.chat.id, JOKE_STICKER)
+            bot.send_sticker(message.chat.id, Globals.JOKE_STICKER)
     else:
-        bot.send_message(message.chat.id, text=MUSIXMATCH_ERROR)
-        bot.send_sticker(message.chat.id, UPS_STICKER)
+        bot.send_message(message.chat.id, text=Globals.MUSIXMATCH_ERROR)
+        bot.send_sticker(message.chat.id, Globals.UPS_STICKER)
 
 
 @bot.message_handler(commands=["charts"])
@@ -121,9 +125,9 @@ def get_charts_of_country(message):
     if not country_code or len(country_code) == 0:
         bot.send_message(
             message.chat.id,
-            text=FORMAT_ISO3166_ERROR,
+            text=Globals.FORMAT_ISO3166_ERROR,
         )
-        bot.send_sticker(message.chat.id, UPS_STICKER)
+        bot.send_sticker(message.chat.id, Globals.UPS_STICKER)
         return
     else:
         response, status = Musixmatch.get_country_charts(country_code)
@@ -133,28 +137,28 @@ def get_charts_of_country(message):
             except:
                 bot.send_message(
                     message.chat.id,
-                    text=FORMAT_ISO3166_ERROR,
+                    text=Globals.FORMAT_ISO3166_ERROR,
                 )
-                bot.send_sticker(message.chat.id, UPS_STICKER)
+                bot.send_sticker(message.chat.id, Globals.UPS_STICKER)
                 return
-            ans = "Here's top chart of *" + cc + "*:\n"
+            ans = Globals.COMMON_WORDS["charts_words"] + "*" + cc + "*:\n"
             for track in response["message"]["body"]["track_list"]:
                 tr = track["track"]["track_name"]
                 artist = track["track"]["artist_name"]
                 url = track["track"]["track_share_url"]
-                ans += "Track: [{}]({}) (lyrics)\nArtist: *".format(tr, url) + \
-                       artist + "*\n\n"
+                ans += Globals.COMMON_WORDS["Track"] + ": [{}]({})".format(tr, url) + "(lyrics)\n" + \
+                       Globals.COMMON_WORDS["Artist"] + ": *" + artist + "*\n\n"
             bot.send_message(message.chat.id,
-                             text=Translate.translation(ans, to_lang=lang),
+                             text=trl.translation(ans, to_lang=gll.get_lang()),
                              parse_mode="Markdown")
-            bot.send_sticker(message.chat.id, PLAYER_STICKER)
+            bot.send_sticker(message.chat.id, Globals.PLAYER_STICKER)
         else:
             bot.send_message(
                 message.chat.id,
-                text=MUSIXMATCH_ERROR)
+                text=Globals.MUSIXMATCH_ERROR)
             bot.send_sticker(
                 message.chat.id,
-                ERROR_STICKER
+                Globals.ERROR_STICKER
             )
 
 
@@ -164,23 +168,25 @@ def get_artists_of_country_chart(message):
     if not country_code or len(country_code) == 0:
         bot.send_message(
             message.chat.id,
-            text=FORMAT_ISO3166_ERROR,
+            text=Globals.FORMAT_ISO3166_ERROR,
         )
-        bot.send_sticker(message.chat.id, UPS_STICKER)
+        bot.send_sticker(message.chat.id, Globals.UPS_STICKER)
     else:
         response, status = Musixmatch.get_chart_artists(country_code)
         if status == 200:
             if not countries.__contains__(country_code.lower()):
                 bot.send_message(message.chat.id,
-                                 text="Didn't find country. " + FORMAT_ISO3166_ERROR,
+                                 text=trl.translation("Didn't find country. ", gll.get_lang()) + \
+                                      Globals.FORMAT_ISO3166_ERROR,
                                  parse_mode="Markdown")
                 return
             country = countries.get(country_code.lower()).name
             answer = (
-                    "Here's artists' top chart of *"
+                    Globals.COMMON_WORDS["chart_artists_words"] + " *"
                     + country
                     + "*:\n"
             )
+            answer = trl.translation(answer, gll.get_lang())
             for artist in response["message"]["body"]["artist_list"]:
                 name = artist["artist"]["artist_name"]
                 if len(artist["artist"]["artist_name_translation_list"]) > 0:
@@ -188,18 +194,18 @@ def get_artists_of_country_chart(message):
                         if transl["artist_name_translation"]["language"] == "EN":
                             name = transl["artist_name_translation"]["translation"]
                             break
-                answer += "Artist: *{}*\n\n".format(name)
+                answer += Globals.COMMON_WORDS["Artist"] + " *{}*\n\n".format(name)
             bot.send_message(message.chat.id,
-                             text=Translate.translation(answer, to_lang=lang),
+                             text=trl.translation(answer, to_lang=gll.get_lang()),
                              parse_mode="Markdown")
         else:
             bot.send_message(
                 message.chat.id,
-                text=MUSIXMATCH_ERROR,
+                text=Globals.MUSIXMATCH_ERROR,
             )
             bot.send_sticker(
                 message.chat.id,
-                ERROR_STICKER
+                Globals.ERROR_STICKER
             )
 
 
@@ -245,7 +251,7 @@ def get_lyrics(message):
     elif not status:
         bot.reply_to(
             message,
-            text=MUSIXMATCH_ERROR,
+            text=Globals.MUSIXMATCH_ERROR,
         )
         return
     keyboard = types.InlineKeyboardMarkup(row_width=2)
@@ -255,11 +261,9 @@ def get_lyrics(message):
                                             callback_data=" ".join(shortened)
                                             )
         keyboard.add(button)
-    text = "Which song are you searching for?\n" \
-           "Please pass track details more correctly " \
-           "(maybe you missed any apostrophe)"
+    text = Globals.COMMON_WORDS["lyrics_words"] + "\n"
     bot.send_message(message.chat.id,
-                     Translate.translation(text, lang),
+                     text=text,
                      reply_markup=keyboard)
 
 
@@ -277,9 +281,9 @@ def callbacks(callback):
     if status:
         text = parse_lyrics(songs[k])
     else:
-        text = MUSIXMATCH_ERROR
+        text = Globals.MUSIXMATCH_ERROR
     bot.edit_message_text(
-        Translate.translation(text[:4096], lang),
+        trl.translation(text[:4096], gll.get_lang()),
         callback.message.chat.id,
         callback.message.message_id
     )
