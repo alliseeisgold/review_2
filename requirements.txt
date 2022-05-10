@@ -1,5 +1,5 @@
 pyTelegramBotAPI
 requests~=2.25.1
-iso3166
+iso3166~=2.0.2
 translate~=3.6.1
-google_trans_new==1.1.9
+urllib3~=1.26.5

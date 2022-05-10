@@ -1,4 +1,4 @@
-from google_trans_new import google_translator
+from src.google_trans_new import google_translator
 
 
 class Translate:
