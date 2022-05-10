@@ -2,3 +2,4 @@ pyTelegramBotAPI
 requests
 iso3166
 translate
+iso639
