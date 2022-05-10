@@ -9,6 +9,12 @@ bot = telebot.TeleBot(BOT_TOKEN)
 lang = "en"
 
 
+@bot.message_handler(commands=["start"])
+def set_lang(message):
+    user = message
+    bot.send_message(message.chat.id, text=user)
+
+
 @bot.message_handler(commands=["set_lang"])
 def set_lang(message):
     global lang
