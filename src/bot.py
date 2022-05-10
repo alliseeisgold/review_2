@@ -93,7 +93,7 @@ def tracks_of_author(message):
     ).strip()
     response, status_code = Musixmatch.get_tracks_of_author(author)
     if status_code == 200:
-        ans = Globals.COMMON_WORDS["tracks_words"] + "*"+author + "*:\n"
+        ans = Globals.COMMON_WORDS["tracks_words"] + "*" + author + "*:\n"
         l = len(ans)
         for track in response["message"]["body"]["track_list"]:
             tr = track["track"]["track_name"]

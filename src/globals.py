@@ -20,7 +20,7 @@ class Globals:
     ERROR_STICKER = 'CAACAgIAAxkBAAEEsTRiek3HOyR1_r--5a3U-oStqfMY7wACYwAD29t-AAGMnQU950KD5yQE'
     COMMON_WORDS = {
         "Album": "Album",
-        "Tracks": "Track",
+        "Track": "Tracks",
         "Author": "Author",
         "tracks_words": "Here's list of popular tracks of ",
         "charts_words": "Here's top chart of",
