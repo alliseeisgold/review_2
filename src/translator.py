@@ -1,9 +1,10 @@
-from translate import Translator
+from google_trans_new import google_translator
 
 
 class Translate:
 
     @staticmethod
     def from_lang_to_lang(text: str, from_lang: str, to_lang: str):
-        t = Translator(from_lang=from_lang, to_lang=to_lang)
-        return t.translate(text)
+        translator = google_translator()
+        translate_text = translator.translate(text, lang_src=from_lang, lang_tgt=to_lang)
+        return translate_text

@@ -2,7 +2,7 @@ import telebot
 from src.config import *
 from src.musixmatch import Musixmatch
 from iso3166 import countries
-from iso639 import languages
+from src.translator import Translate
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -14,17 +14,12 @@ def set_lang(message):
     lang = " ".join(
         [t for t in message.json["text"].split(" ")[1:]]
     ).strip()
-    if not languages.get(lang) or len(lang) == 0:
-        bot.send_message(message.chat.id, text="WTF man?")
-        return
-    bot.send_message(message.chat.id, text=lang)
-
 
 @bot.message_handler(commands=["help"])
 def help(message):
     m = "/tracks <singer name>, for example: /tracks justin bieber "
     ans = m + "\n" + "/charts <country_code>. for example: /charts ru"
-    bot.send_message(message.chat.id, text=ans)
+    bot.send_message(message.chat.id, text=Translate.from_lang_to_lang(ans, 'en', lang))
 
 
 @bot.message_handler(commands=["tracks"])
