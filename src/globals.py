@@ -22,6 +22,7 @@ class Globals:
         "Album": "Album",
         "Track": "Tracks",
         "Author": "Author",
+        "Artist": "Artist",
         "tracks_words": "Here's list of popular tracks of ",
         "charts_words": "Here's top chart of",
         "chart_artists_words": "Here's artists' top chart of",
