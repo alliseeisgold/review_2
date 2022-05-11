@@ -13,6 +13,9 @@ class Musixmatch:
 
     @staticmethod
     def get_tracks_of_author(author, page_size=5):
+        """
+            This api provides you the list of the top musics of a given artist.
+        """
         parameters = (
                 "track.search?q_artist="
                 + author
@@ -31,6 +34,10 @@ class Musixmatch:
 
     @staticmethod
     def get_country_charts(country_code="XW", page_size=5):
+        """
+            This api provides you the list of the top musics and their authors
+            of a given country.
+        """
         parameters = (
                 "chart.tracks.get?country="
                 + country_code
