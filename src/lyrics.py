@@ -2,11 +2,19 @@ import requests
 from bs4 import BeautifulSoup
 from bs4 import Comment
 
+"""
+    This module is for searching and parsing the site to get lyrics of 
+    a given music.
+"""
 
+# url where we will search for a music
 search_url = "https://search.azlyrics.com/search.php?q="
 
 
 def search(parameter, timeout=None):
+    """
+        This function searchs and parses the site with req_url.
+    """
     req_url = search_url + parameter
     try:
         response = requests.get(req_url, timeout)
