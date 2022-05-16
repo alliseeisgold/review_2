@@ -1,6 +1,7 @@
 import requests
 import json
 from src.config import MUSIXMATCH_API_KEY
+from src.globals import Globals
 
 URL = "https://api.musixmatch.com/ws/1.1/"
 
@@ -27,7 +28,7 @@ class Musixmatch:
         response = requests.get(
             req_url,
         )
-        if response.status_code == 200:
+        if response.status_code == Globals.STATUS_CODE:
             x = json.loads(response.content)
             return x, response.status_code
         Musixmatch.return_error(response.status_code)
@@ -48,7 +49,7 @@ class Musixmatch:
         )
         req_url = URL + parameters
         response = requests.get(req_url)
-        if response.status_code == 200:
+        if response.status_code == Globals.STATUS_CODE:
             x = json.loads(response.content)
             return x, response.status_code
         Musixmatch.return_error(response.status_code)
@@ -68,7 +69,7 @@ class Musixmatch:
         )
         req_url = URL + parameters
         response = requests.get(req_url)
-        if response.status_code == 200:
+        if response.status_code == Globals.STATUS_CODE:
             x = json.loads(response.content)
             return x, response.status_code
         Musixmatch.return_error(response.status_code)

@@ -9,7 +9,6 @@ from src.translator import Translate as trl
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# Initializing Globals: only lang
 
 """
     Commands /start and /restart has same functions: 
@@ -170,18 +169,19 @@ def tracks_of_author(message):
     :param message:
     :return:
     """
+    max_len = 30
     author = " ".join(
         [t.capitalize() for t in message.json["text"].split(" ")[1:]]
     ).strip()
     response, status_code = Musixmatch.get_tracks_of_author(author)
-    if status_code == 200:
+    if status_code == Globals.STATUS_CODE:
         ans = Globals.COMMON_WORDS["tracks_words"] + " *" + author + "*:\n"
         l = len(ans)
         for track in response["message"]["body"]["track_list"]:
             tr = track["track"]["track_name"]
             album_name = track["track"]["album_name"]
             url = track["track"]["track_share_url"]
-            if len(tr) < 30:
+            if len(tr) < max_len:
                 ans += Globals.COMMON_WORDS["Track"] + ": [{}]({})\n".format(tr, url)
                 if album_name:
                     ans += Globals.COMMON_WORDS["Album"] + ": *" + album_name + "*"
@@ -243,7 +243,7 @@ def get_charts_of_country(message):
         bot.send_sticker(message.chat.id, Globals.UPS_STICKER)
     else:
         response, status = Musixmatch.get_country_charts(country_code)
-        if status == 200:
+        if status == Globals.STATUS_CODE:
             try:
                 cc = trl.translation(countries.get(country_code.lower()).name,
                                      Globals.LANG, 'en')
@@ -299,7 +299,7 @@ def get_artists_of_country_chart(message):
         bot.send_sticker(message.chat.id, Globals.UPS_STICKER)
     else:
         response, status = Musixmatch.get_chart_artists(country_code)
-        if status == 200:
+        if status == Globals.STATUS_CODE:
             if not countries.__contains__(country_code.lower()):
                 bot.send_message(message.chat.id,
                                  text=trl.translation("Didn't find country. ",
@@ -356,10 +356,10 @@ def short(name):
     elif " " in name:
         l = name.split(" ")
         artist, track = l[:-1], l[-1:]
-    if len(artist) > 15:
-        artist = artist[:15]
-    if len(track) > 15:
-        track = track[:15]
+    if len(artist) > Globals.SHORTEN_LEN:
+        artist = artist[:Globals.SHORTEN_LEN]
+    if len(track) > Globals.SHORTEN_LEN:
+        track = track[:Globals.SHORTEN_LEN]
     return [artist, track]
 
 
@@ -379,8 +379,7 @@ def get_lyrics(message):
             3. If arguments are correct it uses search() function from lyrics module.
             4. And if the search gives status_code 200 that means request was successful,
                it clarifies from you what song you had in mind.
-            5. And if the search wasn't successful it sends y
-
+            5. And if the search wasn't successful it sends you a message about that.
     :param message:
     :return:
     """

@@ -28,6 +28,8 @@ class Globals:
         "no_tracks": " hasn't any tracks."
     }
     HELPER = Translate.translate_syntax('en', 'en')
+    STATUS_CODE = 200
+    SHORTEN_LEN = 15
     LANGUAGES = {
         'af': 'afrikaans',
         'sq': 'albanian',
